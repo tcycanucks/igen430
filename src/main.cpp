@@ -13,8 +13,8 @@
 
 // --- PM SENSOR CONFIGURATION ---
 // Pins: PM Sensor Pin: TX - TX2/GPIO 17, RX - RX2/GPIO 16 (for Serial1)
-#define PM_RX_PIN 16 // Connects to Sensor TX
-#define PM_TX_PIN 17 // Connects to Sensor RX
+#define PM_RX_PIN 26 // Connects to Sensor RX
+#define PM_TX_PIN 27 // Connects to Sensor TX
 
 // --- GLOBAL VARIABLES ---
 Adafruit_PM25AQI aqi = Adafruit_PM25AQI();
