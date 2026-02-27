@@ -5,3 +5,4 @@
 `git add <file path>`: to add file to be committed 
 `git commit -m "<message>"`: to commit (now this is a version of the code that is 'solidified')
 `git push origin main`: to push your updates to your github repo 
+`git restore`: to previous version of github repo
