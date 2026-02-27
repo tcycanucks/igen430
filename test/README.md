@@ -33,6 +33,7 @@ Do these in order every time you finish a task.
 3. Branching (Working with Teammates)
 This is how you work on your own "tab" so you don't overwrite your friend's code.
     `git branch`: Lists all branches (the one with the * is where you are now).
+    `git branch -m new-name-here`: modifies or moves branch
     `git checkout -b <new-name>`: Creates a new branch and switches to it.
     `git checkout <name>`: Switches back to an existing branch (e.g., git checkout main).
     `git pull origin main`: Downloads your teammate's latest work into your current folder.
