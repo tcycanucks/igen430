@@ -11,8 +11,7 @@
 `git pull origin main`: pulls git repo
 `git remote -v`: shows origin of which it fetches and pushes to
 `git restore`: to previous version of github repo
-`git checkout -b <your-branch-name>`: adding a new branch and starting from there
-
+`git fetch --all --prune`: syncs everything
 
 
 
