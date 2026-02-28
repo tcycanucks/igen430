@@ -1,5 +1,7 @@
-# How to use git
+# Notes for platformio.ini
+`pio run`: will run main.cpp and compile it
 
+# How to use git
 
 `git status`: show you all untracked and tracked files
 
