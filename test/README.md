@@ -1,5 +1,7 @@
 # Notes for platformio.ini
-`pio run`: will run main.cpp and compile it
+`pio run`                 # build default env
+`pio run -e esp32dev`     # build the esp32dev env
+`pio run -t upload`       # build then upload
 
 # How to use git
 
