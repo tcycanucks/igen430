@@ -5,16 +5,10 @@
 #include <DFRobot_ENS160.h>
 #include <Adafruit_PM25AQI.h>
 
-// --- PIN CONFIGURATION ---
-#define CAN_TX_PIN 5
-#define CAN_RX_PIN 4
-#define PM_RX_PIN 26 // Connects to PMS5003 TX
-#define PM_TX_PIN 27 // Connects to PMS5003 RX
+#include "pin_configs.h"
+#include "can_configs.h"
+#include "functions.h"
 
-// --- CAN CONFIGURATION ---
-#define CAN_ID_PM_CONCENTRATION 0x100
-#define CAN_ID_PM_AQI_US        0x101
-#define TRANSMIT_INTERVAL_MS 2000 // Update every 2 seconds
 
 // --- GLOBAL OBJECTS ---
 DFRobot_AHT20 aht21;
@@ -23,11 +17,6 @@ Adafruit_PM25AQI aqi = Adafruit_PM25AQI();
 
 bool ens160_alive = false;
 unsigned long previousMillis = 0;
-
-// --- PROTOTYPES ---
-void setup_can();
-void setup_pm_sensor();
-void transmit_can_message(uint32_t identifier, uint8_t data_len, uint8_t data[]);
 
 void setup() {
   Serial.begin(115200);
