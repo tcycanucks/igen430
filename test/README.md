@@ -3,6 +3,28 @@
 `pio run -e esp32dev`     # build the esp32dev env
 `pio run -t upload`       # build then upload
 
+
+# Notes for VScode terminal
+🧹 Cleaning & Escaping
+`clear (or Cmd + K)`: Wipes the screen.
+`Ctrl + C`: Kills a stuck process or exits the current line.
+`Ctrl + U`: Deletes the whole line you just typed.
+`q`: Quits out of "log" or "help" views.
+
+📁 Managing Files & Folders
+`ls`: Lists files. (ls -a to see hidden Git files).
+`cd` ..: Moves up one folder level.
+`cd [folder]`: Moves into a folder (use Tab to auto-complete).
+`mkdir [name]`: Creates a new folder.
+`touch [file]`: Creates a new blank file.
+`rm [file]`: Deletes a file (permanent!).
+
+⌨️ VS Code Shortcuts
+`Control + ``: Toggle terminal.
+`Up Arrow`: Recycles your last typed command.
+`code .`: Opens the current folder in the editor.
+
+
 # How to use git
 
 `git status`: show you all untracked and tracked files

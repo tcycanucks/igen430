@@ -1,6 +1,4 @@
-// current main.cpp has the v1 of code. 
-// note from feb 26: need to test out v1 of code, be careful it may crash
-    // then test with this v2 asap
+// old version of combined code (uses Serial1 for PM sensor, which causes buffer overflow issues). --- IGNORE ---
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -13,6 +11,7 @@
 #include "can_configs.h"
 #include "functions.h"
 
+
 // --- GLOBAL OBJECTS ---
 DFRobot_AHT20 aht21;
 DFRobot_ENS160_I2C ens160(&Wire, 0x53);
@@ -20,8 +19,6 @@ Adafruit_PM25AQI aqi = Adafruit_PM25AQI();
 
 bool ens160_alive = false;
 unsigned long previousMillis = 0;
-PM25_AQI_Data latest_pm_data; // Stores the freshest PM reading
-bool pm_data_valid = false;
 
 void setup() {
   Serial.begin(115200);
@@ -44,26 +41,18 @@ void setup() {
     if (ens160.begin() == NO_ERR) {
       Serial.println("ENS160: ONLINE (0x52)");
       ens160_alive = true;
-    } else {
-      Serial.println("ENS160: FAILED TO CONNECT");
     }
   }
   if (ens160_alive) ens160.setPWRMode(ENS160_STANDARD_MODE);
 
-  // 3. Initialize PM Sensor (Using Serial2!) & CAN
+  // 3. Initialize PM Sensor & CAN
   setup_pm_sensor();
   setup_can();
 }
 
 void loop() {
-  // Constantly poll the PM sensor to keep the serial buffer clean
-  if (aqi.read(&latest_pm_data)) {
-    pm_data_valid = true;
-  }
-
   unsigned long currentMillis = millis();
 
-  // Every 2 seconds, grab the latest data and transmit
   if (currentMillis - previousMillis >= TRANSMIT_INTERVAL_MS) {
     previousMillis = currentMillis;
     
@@ -84,29 +73,21 @@ void loop() {
                     ens160.getAQI(), ens160.getTVOC(), ens160.getECO2());
     }
 
-    // --- STEP 3: PROCESS PM SENSOR & SEND CAN ---
-    if (pm_data_valid) {
-      Serial.printf("PM2.5: %d | PM10: %d | PM_AQI: %d\n", 
-                    latest_pm_data.pm25_env, latest_pm_data.pm100_env, latest_pm_data.aqi_pm25_us);
+    // --- STEP 3: READ PM SENSOR & SEND CAN ---
+    PM25_AQI_Data pm_data;
+    if (aqi.read(&pm_data)) {
+      Serial.printf("PM2.5: %d | PM10: %d | AQI: %d\n", 
+                    pm_data.pm25_env, pm_data.pm100_env, pm_data.aqi_pm25_us);
       
-      // Pack and Transmit CAN Message 1 (Concentrations)
+      // Pack and Transmit CAN Messages
       uint8_t conc_payload[6] = {
-        (uint8_t)(latest_pm_data.pm10_env >> 8), (uint8_t)(latest_pm_data.pm10_env & 0xFF),
-        (uint8_t)(latest_pm_data.pm25_env >> 8), (uint8_t)(latest_pm_data.pm25_env & 0xFF),
-        (uint8_t)(latest_pm_data.pm100_env >> 8), (uint8_t)(latest_pm_data.pm100_env & 0xFF)
+        (uint8_t)(pm_data.pm10_env >> 8), (uint8_t)(pm_data.pm10_env & 0xFF),
+        (uint8_t)(pm_data.pm25_env >> 8), (uint8_t)(pm_data.pm25_env & 0xFF),
+        (uint8_t)(pm_data.pm100_env >> 8), (uint8_t)(pm_data.pm100_env & 0xFF)
       };
       transmit_can_message(CAN_ID_PM_CONCENTRATION, 6, conc_payload);
-
-      // Pack and Transmit CAN Message 2 (AQI)
-      uint8_t aqi_payload[4] = {
-        (uint8_t)(latest_pm_data.aqi_pm25_us >> 8), (uint8_t)(latest_pm_data.aqi_pm25_us & 0xFF),
-        (uint8_t)(latest_pm_data.aqi_pm100_us >> 8), (uint8_t)(latest_pm_data.aqi_pm100_us & 0xFF)
-      };
-      transmit_can_message(CAN_ID_PM_AQI_US, 4, aqi_payload);
-
-      pm_data_valid = false; // Reset for the next cycle
     } else {
-      Serial.println("PM Sensor: Waiting for valid data...");
+      Serial.println("PM Sensor: Read Failed");
     }
     Serial.println("--------------------------");
   }
@@ -126,7 +107,6 @@ void setup_can() {
 }
 
 void setup_pm_sensor() {
-  // CRITICAL FIX: Using Serial2 instead of Serial1
   Serial2.begin(9600, SERIAL_8N1, PM_RX_PIN, PM_TX_PIN); 
   delay(1000);
   if (aqi.begin_UART(&Serial2)) { 
@@ -142,11 +122,5 @@ void transmit_can_message(uint32_t identifier, uint8_t data_len, uint8_t data[])
   message.extd = 0;
   message.data_length_code = data_len;
   memcpy(message.data, data, data_len);
-  
-  // Suppress the "queued successfully" prints to keep your serial monitor clean,
-  // but print if it fails so you know CAN is broken.
-  esp_err_t status = twai_transmit(&message, pdMS_TO_TICKS(100));
-  if (status != ESP_OK) {
-      Serial.printf("CAN Error 0x%X: %s\n", identifier, esp_err_to_name(status));
-  }
+  twai_transmit(&message, pdMS_TO_TICKS(100));
 }
