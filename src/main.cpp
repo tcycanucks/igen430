@@ -105,9 +105,9 @@ void setup_can() {
 }
 
 void setup_pm_sensor() {
-  Serial1.begin(9600, SERIAL_8N1, PM_RX_PIN, PM_TX_PIN); 
+  Serial2.begin(9600, SERIAL_8N1, PM_RX_PIN, PM_TX_PIN); 
   delay(1000);
-  if (aqi.begin_UART(&Serial1)) { 
+  if (aqi.begin_UART(&Serial2)) { 
     Serial.println("PM Sensor: ONLINE");
   } else {
     Serial.println("PM Sensor: NOT FOUND");
